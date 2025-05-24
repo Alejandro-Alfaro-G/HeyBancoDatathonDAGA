@@ -2,9 +2,52 @@
 
 import pandas as pd
 import numpy as np
+import os
+
+
+def codificar_columna(df, columna, ruta_csv, separador=';'):
+    """
+    Crea o carga un archivo de mapeo para una columna categórica,
+    reemplaza comas por '|', asigna un ID numérico y actualiza la columna original con el ID.
+    Los valores que no coincidan o NaN se codifican como 0.
+
+    Args:
+        df (pd.DataFrame): DataFrame original.
+        columna (str): Nombre de la columna a codificar.
+        ruta_csv (str): Ruta del archivo CSV de mapeo.
+        separador (str): Separador usado en el CSV (por defecto ';').
+
+    Returns:
+        pd.DataFrame: DataFrame actualizado con la columna codificada.
+    """
+
+    # Si el archivo no existe, crearlo
+    if not os.path.exists(ruta_csv):
+        valores_unicos = df[columna].dropna().unique()
+        df_mapeo = pd.DataFrame({
+            columna: [str(v).replace(',', '|').strip() for v in valores_unicos],
+            'id': range(1, len(valores_unicos) + 1)
+        })
+        df_mapeo.to_csv(ruta_csv, sep=separador, index=False)
+
+    # Leer el mapeo
+    df_mapeo = pd.read_csv(ruta_csv, sep=separador)
+    mapa = dict(zip(df_mapeo[columna], df_mapeo['id']))
+
+    # Crear columna auxiliar con limpieza de texto
+    columna_limpia = f"{columna}_limpia"
+    df[columna_limpia] = df[columna].astype(str).str.replace(',', '|').str.strip()
+
+    # Aplicar el mapeo con NaN → 0
+    df[columna] = df[columna_limpia].map(mapa).fillna(0).astype(int)
+
+    # Eliminar columna auxiliar
+    df.drop(columns=[columna_limpia], inplace=True)
+
+    return df
 
 print("DATOS DE LA BASE DE CLIENTES")
-# Load the dataset
+
 df = pd.read_csv('HeyBancoDatathonDAGA/datos/base_clientes_final.csv')
 
 print("limpieza de datos")
@@ -23,12 +66,9 @@ df['tipo_persona'] = df['tipo_persona'].map({
     'Persona Fisica Con Actividad Empresarial': 2,
 })
 
-#Convertir 'actividad_empresarial' to categorical values from CSV file
-df_aux = pd.read_csv('HeyBancoDatathonDAGA/datos/actividades_empresariales.csv')
-mapa_aux = dict(zip(df_aux['actividad_empresarial'], df_aux['id']))
-df['actividad_empresarial'] = df['actividad_empresarial'].map(mapa_aux)
+df = codificar_columna(df, 'actividad_empresarial', 'HeyBancoDatathonDAGA/datos/actividades_empresariales.csv')
 
-#print(df.dtypes)
+print(df.dtypes)
 #print(df.describe())
 
 print("DATOS DE LA BASE DE TRANSACCIONES")
@@ -56,41 +96,13 @@ df_t['tipo_venta'] = df_t['tipo_venta'].map({
     'fisica': 1,
 })
 
+''' LIMPIEZA DE GIRO_COMERCIO '''
 
-df_aux = pd.read_csv("HeyBancoDatathonDAGA/datos/relacionalGiros.csv", sep=';', header=None, names=['giro', 'id'])
-df_aux['giro'] = df_aux['giro'].astype(str).str.replace('|', ',', regex=False).str.strip()
-mapa_aux = dict(zip(df_aux['giro'], df_aux['id']))
-df_t['giro_comercio'] = df_t['giro_comercio'].map(mapa_aux)
+df_t = codificar_columna(df_t, 'giro_comercio', 'HeyBancoDatathonDAGA/datos/giro_comercio_codificado.csv')
 
-''' CORRER SOLO SI NO EXISTE EL CSV
-# 1. Obtener valores únicos
-#valores_unicos = df_t['comercio'].dropna().unique()
 
-# 2. Crear DataFrame con reemplazo de comas y numeración desde 1
-df_aux = pd.DataFrame({
-    'comercio': [str(v).replace(',', '|') for v in valores_unicos],
-    'id': range(1, len(valores_unicos) + 1)
-})
+''' LIMPIEZA DE COMERCIO '''
+df_t = codificar_columna(df_t, 'comercio', 'HeyBancoDatathonDAGA/datos/comercios_codificados.csv')
 
-# 3. Guardar a CSV con ; como separador
-#df_aux.to_csv('HeyBancoDatathonDAGA/datos/comercios_codificados.csv', sep=';', index=False)
-'''
-
-# 4. Cargar el CSV como tabla de mapeo
-df_aux = pd.read_csv('HeyBancoDatathonDAGA/datos/comercios_codificados.csv', sep=';')
-
-#5. Crear un diccionario de mapeo
-mapa_aux = dict(zip(df_aux['comercio'], df_aux['id']))
-
-# 6. Preparar columna original reemplazando comas por '|'
-df_t['comercio_limpio'] = df_t['comercio'].astype(str).str.replace(',', '|').str.strip()
-
-# 7. Aplicar mapeo y generar columna con ID
-df_t['comercio'] = df_t['comercio_limpio'].map(mapa_aux)
-
-# 8. Eliminar columna auxiliar
-df_t.drop(columns=['comercio_limpio'], inplace=True)
-
-#print(df_t['giro_comercio'].value_counts())
-
+dt_t.count()
 print(df_t.dtypes)
