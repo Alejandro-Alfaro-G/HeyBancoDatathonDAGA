@@ -58,8 +58,9 @@ df['fecha_alta'] = pd.to_datetime(df['fecha_alta'], format='%Y-%m-%d')
 df['genero'] = df['genero'].map({
     'F': 1,
     'M': 2,
-    ' ': np.nan,  # Convert empty strings to NaN
-})
+    '': 0  # caso explícito de string vacío
+}).fillna(0).astype(int)
+
 
 df['tipo_persona'] = df['tipo_persona'].map({
     'Persona Fisica Sin Actividad Empresarial': 1,
@@ -69,7 +70,7 @@ df['tipo_persona'] = df['tipo_persona'].map({
 df = codificar_columna(df, 'actividad_empresarial', 'HeyBancoDatathonDAGA/datos/actividades_empresariales.csv')
 
 print(df.dtypes)
-#print(df.describe())
+print(df.describe())
 
 print("DATOS DE LA BASE DE TRANSACCIONES")
 
@@ -81,9 +82,9 @@ df_t = pd.read_csv('HeyBancoDatathonDAGA/datos/base_transacciones_final.csv')
 # Display the columns of the dataset
 #print(df_t.columns)
 # Display the data types of the columns
-#print(df_t.dtypes)
+#
 # Display the summary statistics of the dataset
-#print(df_t.describe())
+
 
 
 ##LIMPIEZA DE DATOS
@@ -104,5 +105,5 @@ df_t = codificar_columna(df_t, 'giro_comercio', 'HeyBancoDatathonDAGA/datos/giro
 ''' LIMPIEZA DE COMERCIO '''
 df_t = codificar_columna(df_t, 'comercio', 'HeyBancoDatathonDAGA/datos/comercios_codificados.csv')
 
-dt_t.count()
+print(df_t.describe())
 print(df_t.dtypes)
