@@ -63,6 +63,15 @@ actividades = [
     'TRANSPORTE DE CARGA FORANEA'
 ]
 
+# Crear diccionario con números únicos (empezando desde 1)
+actividad_dict = {'actividad_empresarial': actividades, 'id': list(range(1, len(actividades)+1))}
+
+# Crear DataFrame
+df_actividades = pd.DataFrame(actividad_dict)
+
+# Guardar a CSV
+df_actividades.to_csv("actividades_empresariales.csv", index=False)
+
 # Crear diccionario de mapeo empezando desde 1
 actividad_map = {nombre: i + 1 for i, nombre in enumerate(actividades)}
 
@@ -97,6 +106,8 @@ df_t['tipo_venta'] = df_t['tipo_venta'].map({
     'digital': 0,
     'fisica': 1,
 })
+
+
 
 print(df_t.dtypes)
 
