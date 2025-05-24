@@ -5,7 +5,7 @@ import numpy as np
 
 print("DATOS DE LA BASE DE CLIENTES")
 # Load the dataset
-df = pd.read_csv('HeyBancoDatathonDAGA/data/base_clientes_final.csv')
+df = pd.read_csv('HeyBancoDatathonDAGA/datos/base_clientes_final.csv')
 # Display the shape of the dataset
 #print(df.shape)
 # Display the columns of the dataset
@@ -76,7 +76,7 @@ print(df.describe())
 print("DATOS DE LA BASE DE TRANSACCIONES")
 
 # Load the dataset
-df_t = pd.read_csv('HeyBancoDatathonDAGA/data/base_transacciones_final.csv')
+df_t = pd.read_csv('HeyBancoDatathonDAGA/datos/base_transacciones_final.csv')
 
 # Display the shape of the dataset
 #print(df_t.shape)
