@@ -6,16 +6,9 @@ import numpy as np
 print("DATOS DE LA BASE DE CLIENTES")
 # Load the dataset
 df = pd.read_csv('HeyBancoDatathonDAGA/datos/base_clientes_final.csv')
-# Display the shape of the dataset
-#print(df.shape)
-# Display the columns of the dataset
-#print(df.columns)     
-
-#valores_unicos = sorted(df['actividad_empresarial'].unique())
-#print("Valores unicos :", valores_unicos)
-#print(df['genero'].value_counts())
 
 print("limpieza de datos")
+
 df['fecha_nacimiento'] = pd.to_datetime(df['fecha_nacimiento'], format='%Y-%m-%d')
 df['fecha_alta'] = pd.to_datetime(df['fecha_alta'], format='%Y-%m-%d')
 
@@ -30,57 +23,13 @@ df['tipo_persona'] = df['tipo_persona'].map({
     'Persona Fisica Con Actividad Empresarial': 2,
 })
 
+#Convertir 'actividad_empresarial' to categorical values from CSV file
+df_aux = pd.read_csv('HeyBancoDatathonDAGA/datos/actividades_empresariales.csv')
+mapa_aux = dict(zip(df_aux['actividad_empresarial'], df_aux['id']))
+df['actividad_empresarial'] = df['actividad_empresarial'].map(mapa_aux)
 
-actividades = [
-    'ADMINISTRACION DE INMUEBLES',
-    'AGENCIA DE PUBLICIDAD',
-    'AGENTE DE SEGUROS',
-    'AMA DE CASA',
-    'COMPRA VENTA DE ARTICULOS NO CLASIFICADOS EN OTRA PARTE',
-    'COMPRA VENTA DE HARDWARE SOFTWARE Y ARTCULOS COMPUTACIONALES',
-    'COMPRA VENTA DE ROPA',
-    'COMPRAVENTA DE ARTICULOS DE FERRETERIA',
-    'CONSTRUCCION DE INMUEBLES',
-    'DESPACHO DE OTROS PROFESIONISTAS',
-    'EMPLEADO DE GOBIERNO',
-    'EMPLEADO DEL SECTOR INDUSTRIAL',
-    'EMPLEADO DEL SECTOR SERVICIOS',
-    'ESTABLECIMIENTOS PRIVADOS DE INSTRUCCION EDUCACION CULTURA E INVESTIGACION',
-    'ESTABLECIMIENTOS PUBLICOS DE INSTRUCCION EDUCACION SUBPROFESIONAL YPROFESIONAL CULTURA E INVESTIGACION',
-    'ESTUDIANTE',
-    'JUBILADO',
-    'ORGANIZACIONES DE ABOGADOS MEDICOS INGENIEROS Y OTRAS ASOCIACIONES DE PROFESIONALES',
-    'PREPARACION DE TIERRAS DE CULTIVO Y OTROS SERVICIOS AGRICOLAS',
-    'PRESTACION DE OTROS SERVICIOS TECNICOS',
-    'PROFESIONISTA INDEPENDIENTE',
-    'SERVICIOS ADMINISTRATIVOS DE TRAMITE Y COBRANZA INCLUSO ESCRITORIOS PUBLICOS',
-    'SERVICIOS DE ANALISIS DE SISTEMAS Y PROCESAMIENTO ELECTRONICO DE DATOS',
-    'SERVICIOS DE ASESORIA Y ESTUDIOS TECNICOS DE ARQUITECTURA E INGENIERIA INCLUSO DISEO INDUSTRIAL',
-    'SERVICIOS DE CONTADURIA Y AUDITORIA INCLUSO TENEDURIA DE LIBROS',
-    'SERVICIOS MEDICO GENERAL Y ESPECIALIZADO EN CONSULTORIOS',
-    'TELEDIFUSORA',
-    'TIENDA DE ABARROTES Y MISCELANEA',
-    'TRANSPORTE DE CARGA FORANEA'
-]
-
-# Crear diccionario con números únicos (empezando desde 1)
-actividad_dict = {'actividad_empresarial': actividades, 'id': list(range(1, len(actividades)+1))}
-
-# Crear DataFrame
-df_actividades = pd.DataFrame(actividad_dict)
-
-# Guardar a CSV
-df_actividades.to_csv("actividades_empresariales.csv", index=False)
-
-# Crear diccionario de mapeo empezando desde 1
-actividad_map = {nombre: i + 1 for i, nombre in enumerate(actividades)}
-
-# Aplicar el mapeo
-df['actividad_empresarial'] = df['actividad_empresarial'].map(actividad_map)
-
-
-print(df.dtypes)
-print(df.describe())
+#print(df.dtypes)
+#print(df.describe())
 
 print("DATOS DE LA BASE DE TRANSACCIONES")
 
@@ -108,14 +57,40 @@ df_t['tipo_venta'] = df_t['tipo_venta'].map({
 })
 
 
+df_aux = pd.read_csv("HeyBancoDatathonDAGA/datos/relacionalGiros.csv", sep=';', header=None, names=['giro', 'id'])
+df_aux['giro'] = df_aux['giro'].astype(str).str.replace('|', ',', regex=False).str.strip()
+mapa_aux = dict(zip(df_aux['giro'], df_aux['id']))
+df_t['giro_comercio'] = df_t['giro_comercio'].map(mapa_aux)
 
-print(df_t.dtypes)
+''' CORRER SOLO SI NO EXISTE EL CSV
+# 1. Obtener valores únicos
+#valores_unicos = df_t['comercio'].dropna().unique()
 
+# 2. Crear DataFrame con reemplazo de comas y numeración desde 1
+df_aux = pd.DataFrame({
+    'comercio': [str(v).replace(',', '|') for v in valores_unicos],
+    'id': range(1, len(valores_unicos) + 1)
+})
 
-#valores_unicos = df_t['giro_comercio'].unique()
-#print("Valores únicos :", valores_unicos)
+# 3. Guardar a CSV con ; como separador
+#df_aux.to_csv('HeyBancoDatathonDAGA/datos/comercios_codificados.csv', sep=';', index=False)
+'''
+
+# 4. Cargar el CSV como tabla de mapeo
+df_aux = pd.read_csv('HeyBancoDatathonDAGA/datos/comercios_codificados.csv', sep=';')
+
+#5. Crear un diccionario de mapeo
+mapa_aux = dict(zip(df_aux['comercio'], df_aux['id']))
+
+# 6. Preparar columna original reemplazando comas por '|'
+df_t['comercio_limpio'] = df_t['comercio'].astype(str).str.replace(',', '|').str.strip()
+
+# 7. Aplicar mapeo y generar columna con ID
+df_t['comercio'] = df_t['comercio_limpio'].map(mapa_aux)
+
+# 8. Eliminar columna auxiliar
+df_t.drop(columns=['comercio_limpio'], inplace=True)
+
 #print(df_t['giro_comercio'].value_counts())
 
-
-
-print("vamos a por toda en este hack")
+print(df_t.dtypes)
