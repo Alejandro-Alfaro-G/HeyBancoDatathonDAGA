@@ -1,7 +1,6 @@
 #initial commit
 
 import pandas as pd
-import numpy as np
 import os
 
 
@@ -102,6 +101,8 @@ df = codificar_columna(df, 'actividad_empresarial', 'HeyBancoDatathonDAGA/datos/
 
 # Calcular edad
 df['edad'] = (pd.to_datetime('today') - df['fecha_nacimiento']).dt.days // 365
+
+df.drop(['fecha_nacimiento', 'fecha_alta'], axis=1, inplace=True)
 
 print(df.dtypes)
 print(df.describe())
