@@ -20,7 +20,7 @@ def predecir_desde_hoy(cliente_id, clientes, transacciones, dias_prediccion=90):
             return None, "Cliente no encontrado"
         
         # 1. Identificar patrones recurrentes
-        patrones = cliente_data.groupby(['comercio_id', 'giro_comercio']).agg(
+        patrones = cliente_data.groupby(['comercio_id', 'comercio', 'giro_comercio']).agg(
             frecuencia=('fecha', 'count'),
             monto_promedio=('monto', 'mean'),
             ultima_transaccion=('fecha', 'max'),
@@ -65,7 +65,8 @@ def predecir_desde_hoy(cliente_id, clientes, transacciones, dias_prediccion=90):
                 }, index=[0])
                 
                 predicciones.append({
-                    'comercio': patron['giro_comercio'],
+                    'comercio_nombre': patron['comercio'],  # Nombre específico (ej: "AMAZON")
+                    'comercio_giro': patron['giro_comercio'],  # Categoría (ej: "COMERCIO ELECTRÓNICO")
                     'fecha_predicha': siguiente_fecha.strftime('%Y-%m-%d'),
                     'dias_desde_hoy': (siguiente_fecha.date() - hoy).days,
                     'monto_esperado': round(model.predict(X_pred)[0], 2),
@@ -113,7 +114,7 @@ if __name__ == "__main__":
         # Guardar resultados
         nombre_archivo = f"predicciones_{cliente_id}_{datetime.now().date()}.csv"
         resultados.to_csv("HeyBancoDatathonDAGA/resultados/" + nombre_archivo, index=False)
-        print(f"\nResultados guardados en: {nombre_archivo}")
+        print(f"\nResultados guardados en: HeyBancoDatathonDAGA/resultados/{nombre_archivo}")
     else:
         print(f"\n{mensaje}")
     
