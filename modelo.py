@@ -22,10 +22,10 @@ data = pd.merge(transacciones, clientes, on='id')
 
 # Convertir variables categóricas en dummies
 data = pd.get_dummies(data, columns=['comercio_id', 'actividad_empresarial_id', 'tipo_venta',
-                                     'tipo_persona', 'genero', 'id_municipio', 'id_estado'])
+                                     'tipo_persona', 'genero', 'id_municipio', 'id_estado', 'actividad_empresarial', 'giro_comercio', 'comercio'])
 
 # Eliminar columnas no relevantes y definir X, y
-X = data.drop(['monto', 'fecha', 'id', 'dia', 'mes'], axis=1)
+X = data.drop(['monto', 'fecha', 'id', 'dia_mes', 'dia_semana'], axis=1)
 y = data['monto']
 
 # Submuestreo para velocidad

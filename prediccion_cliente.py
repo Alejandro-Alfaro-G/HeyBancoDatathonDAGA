@@ -18,17 +18,17 @@ def predecir_desde_hoy(cliente_id, clientes, transacciones, dias_prediccion=90):
         
         if cliente_data.empty:
             return None, "Cliente no encontrado"
-        
+
         # 1. Identificar patrones recurrentes
-        patrones = cliente_data.groupby(['comercio_id', 'comercio', 'giro_comercio']).agg(
+        patrones = cliente_data.groupby(['giro_comercio']).agg(
             frecuencia=('fecha', 'count'),
             monto_promedio=('monto', 'mean'),
             ultima_transaccion=('fecha', 'max'),
             primera_transaccion=('fecha', 'min')
         ).reset_index()
         
-        # Filtrar patrones con suficiente historial (≥3 transacciones)
-        patrones = patrones[patrones['frecuencia'] >= 3].copy()
+        # Filtrar patrones con suficiente historial (≥12 transacciones)
+        patrones = patrones[patrones['frecuencia'] >= 12].copy()
         
         # Calcular periodicidad en días
         patrones['periodicidad_dias'] = (patrones['ultima_transaccion'] - patrones['primera_transaccion']).dt.days / (patrones['frecuencia'] - 1)
@@ -65,8 +65,7 @@ def predecir_desde_hoy(cliente_id, clientes, transacciones, dias_prediccion=90):
                 }, index=[0])
                 
                 predicciones.append({
-                    'comercio_nombre': patron['comercio'],  # Nombre específico (ej: "AMAZON")
-                    'comercio_giro': patron['giro_comercio'],  # Categoría (ej: "COMERCIO ELECTRÓNICO")
+                    'comercio_giro': patron['giro_comercio'], 
                     'fecha_predicha': siguiente_fecha.strftime('%Y-%m-%d'),
                     'dias_desde_hoy': (siguiente_fecha.date() - hoy).days,
                     'monto_esperado': round(model.predict(X_pred)[0], 2),
@@ -74,7 +73,6 @@ def predecir_desde_hoy(cliente_id, clientes, transacciones, dias_prediccion=90):
                     'frecuencia_dias': round(patron['periodicidad_dias'], 1),
                     'ultimas_transacciones': patron['frecuencia']
                 })
-                
                 siguiente_fecha += timedelta(days=patron['periodicidad_dias'])
         
         if not predicciones:
@@ -83,6 +81,7 @@ def predecir_desde_hoy(cliente_id, clientes, transacciones, dias_prediccion=90):
         # Convertir a DataFrame y ordenar
         df_pred = pd.DataFrame(predicciones)
         df_pred = df_pred.sort_values(['fecha_predicha', 'probabilidad'], ascending=[True, False])
+        
         
         return df_pred, "Predicciones generadas desde hoy"
     
