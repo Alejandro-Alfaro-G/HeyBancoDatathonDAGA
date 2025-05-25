@@ -64,7 +64,7 @@ def codificar_columna(df, columna, ruta_csv, comercio=False, separador=';'):
         df[columna_limpia] = df[columna].astype(str).str.replace(',', '|').str.strip()
 
         # Aplicar el mapeo con NaN → 0
-        df[columna] = df[columna_limpia].map(mapa).fillna(0).astype(int)
+        df[f'{columna}_id'] = df[columna_limpia].map(mapa).fillna(0).astype(int)
 
         # Eliminar columna auxiliar
         df.drop(columns=[columna_limpia], inplace=True)
@@ -101,7 +101,7 @@ df = codificar_columna(df, 'actividad_empresarial', 'HeyBancoDatathonDAGA/datos/
 
 # Calcular edad
 df['edad'] = (pd.to_datetime('today') - df['fecha_nacimiento']).dt.days // 365
-
+df['antiguedad'] = (pd.to_datetime('today') - df['fecha_alta']).dt.days // 365
 df.drop(['fecha_nacimiento', 'fecha_alta'], axis=1, inplace=True)
 
 print(df.dtypes)

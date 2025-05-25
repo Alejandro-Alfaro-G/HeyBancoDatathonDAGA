@@ -28,7 +28,7 @@ data = pd.merge(transacciones, clientes, on='id')
 data = pd.get_dummies(data, columns=['comercio', 'giro_comercio', 'actividad_empresarial'])  # Suponiendo que estas son las variables categóricas
 
 # Seleccionar características y variable objetivo
-X = data.drop(['monto', 'fecha', 'id'], axis=1)
+X = data.drop(['monto', 'fecha', 'id', 'actividad_empresarial_id', 'comercio_id'], axis=1)
 y = data['monto']
 
 # División de los datos en entrenamiento y prueba
@@ -48,10 +48,47 @@ mse = mean_squared_error(y_test, y_pred)
 print(f'MAE: {mae}')
 print(f'MSE: {mse}')
 
-# Gráfica de predicciones vs valores reales
-plt.scatter(y_test, y_pred)
-plt.xlabel('Valores Reales')
-plt.ylabel('Predicciones')
-plt.title('Predicciones vs Valores Reales')
+# Elegir 30 índices aleatorios del conjunto de prueba
+indices = np.random.choice(len(y_test), size=30, replace=False)
+
+# Subconjuntos para graficar
+y_test_sample = y_test.iloc[indices]
+y_pred_sample = y_pred[indices]
+
+# Gráfica
+plt.figure(figsize=(8, 6))
+plt.scatter(range(30), y_test_sample, color='blue', label='Valor Real', alpha=0.6)
+plt.scatter(range(30), y_pred_sample, color='orange', label='Predicción', alpha=0.6)
+plt.xlabel('Índice de muestra')
+plt.ylabel('Monto')
+plt.title('Valor Real vs Predicción (30 muestras aleatorias)')
+plt.legend()
 plt.grid(True)
 plt.show()
+
+# Obtener coeficientes e intercepto
+coeficientes = model.coef_
+intercepto = model.intercept_
+
+# Obtener los nombres de las variables (columnas)
+nombres_columnas = X.columns
+
+# Imprimir la ecuación de la regresión
+print("Ecuación de la regresión lineal:")
+ecuacion = f"monto = {intercepto:.4f}"
+for nombre, coef in zip(nombres_columnas, coeficientes):
+    ecuacion += f" + ({coef:.4f} * {nombre})"
+print(ecuacion)
+
+
+# Gráfica de predicciones vs valores reales
+'''plt.figure(figsize=(8, 6))
+plt.scatter(range(len(y_test)), y_test, color='blue', label='Valor Real', alpha=0.6)
+plt.scatter(range(len(y_pred)), y_pred, color='orange', label='Predicción', alpha=0.6)
+plt.xlabel('Valores reales')
+plt.ylabel('Predicciones')
+plt.title('Valor Real vs Predicción')
+plt.legend()
+plt.grid(True)
+plt.show()'''
+
