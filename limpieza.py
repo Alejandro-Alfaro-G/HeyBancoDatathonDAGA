@@ -102,7 +102,7 @@ df = codificar_columna(df, 'actividad_empresarial', 'HeyBancoDatathonDAGA/datos/
 # Calcular edad
 df['edad'] = (pd.to_datetime('today') - df['fecha_nacimiento']).dt.days // 365
 df['antiguedad'] = (pd.to_datetime('today') - df['fecha_alta']).dt.days // 365
-df.drop(['fecha_nacimiento', 'fecha_alta'], axis=1, inplace=True)
+df.drop(['fecha_nacimiento', 'fecha_alta', 'actividad_empresarial'], axis=1, inplace=True)
 
 print(df.dtypes)
 print(df.describe())
@@ -117,7 +117,10 @@ df_t = pd.read_csv('HeyBancoDatathonDAGA/datos/base_transacciones_final.csv')
 
 ##LIMPIEZA DE DATOS
 df_t['fecha'] = pd.to_datetime(df_t['fecha'], format='%Y-%m-%d')
-
+# Crear nuevas columnas 'dia' y 'mes'
+df_t['dia'] = df_t['fecha'].dt.day
+df_t['mes'] = df_t['fecha'].dt.month
+df_t.drop(['fecha'], axis=1, inplace=True)
 # Convert 'tipo_venta' to categorical values 1: fisica, 0: digital
 df_t['tipo_venta'] = df_t['tipo_venta'].map({
     'digital': 1,
@@ -126,6 +129,7 @@ df_t['tipo_venta'] = df_t['tipo_venta'].map({
 
 # Convertir 'comercio' a valores categóricos, poniendo 'giro_comercio' como atributo
 df_t = codificar_columna(df_t, 'comercio', 'HeyBancoDatathonDAGA/datos/comercios_codificados.csv', True)
+df_t =df_t.drop(columns=['comercio', 'giro_comercio'])
 
 print(df_t.describe())
 print(df_t.dtypes)

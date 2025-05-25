@@ -25,14 +25,28 @@ clientes = pd.read_csv('HeyBancoDatathonDAGA/datos/dataclientes.csv', delimiter=
 data = pd.merge(transacciones, clientes, on='id')
 
 # Convertir variables categóricas en variables dummy
-data = pd.get_dummies(data, columns=['comercio', 'giro_comercio', 'actividad_empresarial'])  # Suponiendo que estas son las variables categóricas
+data = pd.get_dummies(data, columns=['comercio_id', 'actividad_empresarial_id', 'tipo_venta', 'tipo_persona', 'genero'])  # Suponiendo que estas son las variables categóricas
 
 # Seleccionar características y variable objetivo
-X = data.drop(['monto', 'fecha', 'id', 'actividad_empresarial_id', 'comercio_id'], axis=1)
+X = data.drop(['monto', 'id', 'dia', 'mes'], axis=1)
 y = data['monto']
+
+X = X.sample(3000, random_state=42)
+y = y.loc[X.index]
 
 # División de los datos en entrenamiento y prueba
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# ENTRENAR RANDOM FOREST PARA VER IMPORTANCIA DE VARIABLES
+rf = RandomForestRegressor(n_estimators=20, max_depth=5, random_state=42)
+rf.fit(X_train, y_train)
+
+importancia = pd.Series(rf.feature_importances_, index=X.columns)
+importancia.sort_values(ascending=False).head(20).plot(kind='barh', figsize=(10, 6))
+plt.title("Top 20 Variables más importantes (Random Forest)")
+plt.xlabel("Importancia")
+plt.tight_layout()
+plt.show()
 
 # Entrenar el modelo de regresión lineal
 model = LinearRegression()
