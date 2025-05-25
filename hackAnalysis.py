@@ -4,46 +4,74 @@ import pandas as pd
 import numpy as np
 import os
 
-def codificar_columna(df, columna, ruta_csv, separador=';'):
+
+def codificar_columna(df, columna, ruta_csv, comercio=False, separador=';'):
     """
-    Crea o carga un archivo de mapeo para una columna categórica,
-    reemplaza comas por '|', asigna un ID numérico y actualiza la columna original con el ID.
-    Los valores que no coincidan o NaN se codifican como 0.
+    Codifica una columna categórica (o una combinación con giro_comercio) con IDs únicos.
+    
+    Si comercio=True, también se utiliza la columna 'giro_comercio' para crear combinaciones únicas.
 
     Args:
         df (pd.DataFrame): DataFrame original.
         columna (str): Nombre de la columna a codificar.
-        ruta_csv (str): Ruta del archivo CSV de mapeo.
-        separador (str): Separador usado en el CSV (por defecto ';').
+        ruta_csv (str): Ruta donde guardar o cargar el mapeo.
+        comercio (bool): Si True, codifica combinaciones de columna + giro_comercio.
+        separador (str): Separador del CSV (default ';').
 
     Returns:
-        pd.DataFrame: DataFrame actualizado con la columna codificada.
+        pd.DataFrame: DataFrame con nueva columna codificada como {columna}_id.
     """
 
-    # Si el archivo no existe, crearlo
+    # Generar archivo si no existe
     if not os.path.exists(ruta_csv):
-        valores_unicos = df[columna].dropna().unique()
-        df_mapeo = pd.DataFrame({
-            columna: [str(v).replace(',', '|').strip() for v in valores_unicos],
-            'id': range(1, len(valores_unicos) + 1)
-        })
-        df_mapeo.to_csv(ruta_csv, sep=separador, index=False)
+        if comercio:
+            if 'giro_comercio' not in df.columns:
+                raise ValueError("Falta la columna 'giro_comercio' en el DataFrame.")
 
-    # Leer el mapeo
+            df_temp = df[[columna, 'giro_comercio']].dropna().copy()
+            df_temp[columna] = df_temp[columna].astype(str).str.replace(',', '|').str.strip()
+            df_temp['giro_comercio'] = df_temp['giro_comercio'].astype(str).str.replace(',', '|').str.strip()
+            df_temp = df_temp.drop_duplicates()
+            df_temp['id'] = range(1, len(df_temp) + 1)
+            df_temp.to_csv(ruta_csv, sep=separador, index=False)
+        else:
+            valores_unicos = df[columna].dropna().astype(str).str.replace(',', '|').str.strip().unique()
+            df_mapeo = pd.DataFrame({
+                columna: valores_unicos,
+                'id': range(1, len(valores_unicos) + 1)
+            })
+            df_mapeo.to_csv(ruta_csv, sep=separador, index=False)
+
+    # Cargar el mapeo
     df_mapeo = pd.read_csv(ruta_csv, sep=separador)
-    mapa = dict(zip(df_mapeo[columna], df_mapeo['id']))
 
-    # Crear columna auxiliar con limpieza de texto
-    columna_limpia = f"{columna}_limpia"
-    df[columna_limpia] = df[columna].astype(str).str.replace(',', '|').str.strip()
+    if comercio:
+        # Limpiar columnas en df original
+        df[columna] = df[columna].astype(str).str.replace(',', '|').str.strip()
+        df['giro_comercio'] = df['giro_comercio'].astype(str).str.replace(',', '|').str.strip()
 
-    # Aplicar el mapeo con NaN → 0
-    df[columna] = df[columna_limpia].map(mapa).fillna(0).astype(int)
+        # Renombrar 'id' del mapeo para evitar colisiones con otras columnas
+        df_mapeo = df_mapeo.rename(columns={'id': f'{columna}_id'})
 
-    # Eliminar columna auxiliar
-    df.drop(columns=[columna_limpia], inplace=True)
+        # Merge y asignación de ID
+        df = df.merge(df_mapeo, how='left', on=[columna, 'giro_comercio'])
+
+        # Llenar nulos con 0 y convertir a int
+        df[f'{columna}_id'] = df[f'{columna}_id'].fillna(0).astype(int)
+    else:
+        mapa = dict(zip(df_mapeo[columna], df_mapeo['id']))
+        # Crear columna auxiliar con limpieza de texto
+        columna_limpia = f"{columna}_limpia"
+        df[columna_limpia] = df[columna].astype(str).str.replace(',', '|').str.strip()
+
+        # Aplicar el mapeo con NaN → 0
+        df[columna] = df[columna_limpia].map(mapa).fillna(0).astype(int)
+
+        # Eliminar columna auxiliar
+        df.drop(columns=[columna_limpia], inplace=True)
 
     return df
+
 
 ''' DATOS DE LA BASE DE CLIENTES '''
 
@@ -67,7 +95,7 @@ df['tipo_persona'] = df['tipo_persona'].map({
     'Persona Fisica Con Actividad Empresarial': 2,
 })
 
-df = codificar_columna(df, 'actividad_empresarial', 'HeyBancoDatathonDAGA/datos/actividades_empresariales.csv')
+df = codificar_columna(df, 'actividad_empresarial', 'HeyBancoDatathonDAGA/datos/actividades_empresariales.csv', False)
 
 df['edad'] = (pd.to_datetime('today') - df['fecha_nacimiento']).dt.days // 365
 
@@ -97,9 +125,11 @@ df_t['tipo_venta'] = df_t['tipo_venta'].map({
     'fisica': 1,
 })
 
-df_t = codificar_columna(df_t, 'giro_comercio', 'HeyBancoDatathonDAGA/datos/giro_comercio_codificado.csv')
 
-df_t = codificar_columna(df_t, 'comercio', 'HeyBancoDatathonDAGA/datos/comercios_codificados.csv')
+df_t = codificar_columna(df_t, 'comercio', 'HeyBancoDatathonDAGA/datos/comercios_codificados.csv', True)
 
 print(df_t.describe())
 print(df_t.dtypes)
+
+
+df_t.to_csv('HeyBancoDatathonDAGA/datos/datadetrans.csv', sep=';', index=False)
