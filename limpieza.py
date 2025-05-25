@@ -77,13 +77,15 @@ def codificar_columna(df, columna, ruta_csv, comercio=False, separador=';'):
 
 print("DATOS DE LA BASE DE CLIENTES")
 
+# Cargar el dataset
 df = pd.read_csv('HeyBancoDatathonDAGA/datos/base_clientes_final.csv')
 
-print("limpieza de datos")
-
+#Limpiar fecha_nacimiento y fecha_alta
 df['fecha_nacimiento'] = pd.to_datetime(df['fecha_nacimiento'], format='%Y-%m-%d')
 df['fecha_alta'] = pd.to_datetime(df['fecha_alta'], format='%Y-%m-%d')
 
+
+#Limpiar genero y tipo_persona
 df['genero'] = df['genero'].map({
     'F': 1,
     'M': 2,
@@ -95,8 +97,10 @@ df['tipo_persona'] = df['tipo_persona'].map({
     'Persona Fisica Con Actividad Empresarial': 2,
 })
 
+# Convertir 'actividad_empresarial' a valores categóricos
 df = codificar_columna(df, 'actividad_empresarial', 'HeyBancoDatathonDAGA/datos/actividades_empresariales.csv', False)
 
+# Calcular edad
 df['edad'] = (pd.to_datetime('today') - df['fecha_nacimiento']).dt.days // 365
 
 print(df.dtypes)
@@ -107,16 +111,10 @@ print(df.describe())
 
 print("DATOS DE LA BASE DE TRANSACCIONES")
 
-# Load the dataset
+# Carga del dataset
 df_t = pd.read_csv('HeyBancoDatathonDAGA/datos/base_transacciones_final.csv')
 
-# Display the shape of the dataset
-#print(df_t.shape)
-# Display the columns of the dataset
-#print(df_t.columns)
-
 ##LIMPIEZA DE DATOS
-print("limpieza de datos")
 df_t['fecha'] = pd.to_datetime(df_t['fecha'], format='%Y-%m-%d')
 
 # Convert 'tipo_venta' to categorical values 1: fisica, 0: digital
@@ -125,12 +123,12 @@ df_t['tipo_venta'] = df_t['tipo_venta'].map({
     'fisica': 2,
 })
 
-
+# Convertir 'comercio' a valores categóricos, poniendo 'giro_comercio' como atributo
 df_t = codificar_columna(df_t, 'comercio', 'HeyBancoDatathonDAGA/datos/comercios_codificados.csv', True)
 
 print(df_t.describe())
 print(df_t.dtypes)
 
-
+# Guardar los DataFrames limpios
 df_t.to_csv('HeyBancoDatathonDAGA/datos/datadetrans.csv', sep=';', index=False)
 df.to_csv('HeyBancoDatathonDAGA/datos/dataclientes.csv', sep=';', index=False)
