@@ -133,5 +133,8 @@ print(df_t.dtypes)
 df_t.to_csv('HeyBancoDatathonDAGA/datos/datadetrans.csv', sep=';', index=False)
 df.to_csv('HeyBancoDatathonDAGA/datos/dataclientes.csv', sep=';', index=False)
 
+
+
+
 df_u = pd.merge(df,df_t , on="id")
 df_u.to_csv('HeyBancoDatathonDAGA/datos/dataclientesMEGA.csv')
