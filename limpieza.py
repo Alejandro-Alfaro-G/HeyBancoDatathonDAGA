@@ -133,3 +133,4 @@ print(df_t.dtypes)
 
 
 df_t.to_csv('HeyBancoDatathonDAGA/datos/datadetrans.csv', sep=';', index=False)
+df.to_csv('HeyBancoDatathonDAGA/datos/dataclientes.csv', sep=';', index=False)
