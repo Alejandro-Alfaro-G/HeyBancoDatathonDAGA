@@ -5,6 +5,7 @@ import numpy as np
 import os
 
 
+print("Working directory:", os.getcwd())
 def codificar_columna(df, columna, ruta_csv, separador=';'):
     """
     Crea o carga un archivo de mapeo para una columna categórica,
@@ -48,7 +49,7 @@ def codificar_columna(df, columna, ruta_csv, separador=';'):
 
 print("DATOS DE LA BASE DE CLIENTES")
 
-df = pd.read_csv('HeyBancoDatathonDAGA/datos/base_clientes_final.csv')
+df = pd.read_csv('datos/base_clientes_final.csv')
 
 print("limpieza de datos")
 
