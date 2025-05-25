@@ -25,10 +25,10 @@ clientes = pd.read_csv('HeyBancoDatathonDAGA/datos/dataclientes.csv', delimiter=
 data = pd.merge(transacciones, clientes, on='id')
 
 # Convertir variables categóricas en variables dummy
-data = pd.get_dummies(data, columns=['comercio'])  # Suponiendo que estas son las variables categóricas
+data = pd.get_dummies(data, columns=['comercio', 'giro_comercio', 'actividad_empresarial'])  # Suponiendo que estas son las variables categóricas
 
 # Seleccionar características y variable objetivo
-X = data.drop(['id', 'fecha'], axis=1)
+X = data.drop(['id', 'fecha', 'id_estado', 'id_municipio', 'genero'], axis=1)
 y = data['monto']
 
 # División de los datos en entrenamiento y prueba
