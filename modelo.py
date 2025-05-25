@@ -1,3 +1,6 @@
+# usen el siguiente comando para instalar las dependencias necesarias:
+# pip install pandas numpy matplotlib seaborn scikit-learn xgboost lightgbm imbalanced-learn jupyterlab tqdm
+
 import pandas as pd
 import numpy as np
 import sklearn
@@ -10,15 +13,6 @@ import seaborn as sns
 from sklearn.ensemble import RandomForestClassifier
 from xgboost import XGBRegressor
 
-# usen el siguiente comando para instalar las dependencias necesarias:
-# pip install pandas numpy matplotlib seaborn scikit-learn xgboost lightgbm imbalanced-learn jupyterlab tqdm
-
-# Cargar los datos de actividades empresariales
-actividad_empresarial = pd.read_csv('HeyBancoDatathonDAGA/datos/actividades_empresariales.csv', delimiter=';')
-
-# Cargar los datos de comercio
-comercio = pd.read_csv('HeyBancoDatathonDAGA/datos/comercios_codificados.csv', delimiter=';')
-
 # Cargar los datos de transacciones
 transacciones = pd.read_csv('HeyBancoDatathonDAGA/datos/datadetrans.csv', delimiter=';')
 
@@ -29,10 +23,10 @@ clientes = pd.read_csv('HeyBancoDatathonDAGA/datos/dataclientes.csv', delimiter=
 data = pd.merge(transacciones, clientes, on='id')
 
 # Convertir variables categóricas en variables dummy
-data = pd.get_dummies(data, columns=['actividad_empresarial', 'giro_comercio'])  # Suponiendo que estas son las variables categóricas
+data = pd.get_dummies(data, columns=['comercio', 'giro_comercio', 'tipo_venta'])  # Suponiendo que estas son las variables categóricas
 
 # Seleccionar características y variable objetivo
-X = data.drop(['monto', 'id'], axis=1)
+X = data.drop(['monto', 'id', 'fecha_nacimiento', 'fecha', 'fecha_alta'], axis=1)
 y = data['monto']
 
 # División de los datos en entrenamiento y prueba
