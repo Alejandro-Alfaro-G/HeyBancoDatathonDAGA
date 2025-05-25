@@ -112,7 +112,7 @@ if __name__ == "__main__":
         
         # Guardar resultados
         nombre_archivo = f"predicciones_{cliente_id}_{datetime.now().date()}.csv"
-        resultados.to_csv(nombre_archivo, index=False)
+        resultados.to_csv("HeyBancoDatathonDAGA/resultados/" + nombre_archivo, index=False)
         print(f"\nResultados guardados en: {nombre_archivo}")
     else:
         print(f"\n{mensaje}")
