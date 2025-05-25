@@ -4,7 +4,6 @@ import pandas as pd
 import numpy as np
 import os
 
-
 def codificar_columna(df, columna, ruta_csv, separador=';'):
     """
     Crea o carga un archivo de mapeo para una columna categórica,
@@ -46,6 +45,8 @@ def codificar_columna(df, columna, ruta_csv, separador=';'):
 
     return df
 
+''' DATOS DE LA BASE DE CLIENTES '''
+
 print("DATOS DE LA BASE DE CLIENTES")
 
 df = pd.read_csv('HeyBancoDatathonDAGA/datos/base_clientes_final.csv')
@@ -61,7 +62,6 @@ df['genero'] = df['genero'].map({
     '': 0  # caso explícito de string vacío
 }).fillna(0).astype(int)
 
-
 df['tipo_persona'] = df['tipo_persona'].map({
     'Persona Fisica Sin Actividad Empresarial': 1,
     'Persona Fisica Con Actividad Empresarial': 2,
@@ -69,8 +69,13 @@ df['tipo_persona'] = df['tipo_persona'].map({
 
 df = codificar_columna(df, 'actividad_empresarial', 'HeyBancoDatathonDAGA/datos/actividades_empresariales.csv')
 
+df['edad'] = (pd.to_datetime('today') - df['fecha_nacimiento']).dt.days // 365
+
 print(df.dtypes)
 print(df.describe())
+
+
+''' DATOS DE LA BASE DE TRANSACCIONES '''
 
 print("DATOS DE LA BASE DE TRANSACCIONES")
 
@@ -81,11 +86,6 @@ df_t = pd.read_csv('HeyBancoDatathonDAGA/datos/base_transacciones_final.csv')
 #print(df_t.shape)
 # Display the columns of the dataset
 #print(df_t.columns)
-# Display the data types of the columns
-#
-# Display the summary statistics of the dataset
-
-
 
 ##LIMPIEZA DE DATOS
 print("limpieza de datos")
@@ -97,12 +97,8 @@ df_t['tipo_venta'] = df_t['tipo_venta'].map({
     'fisica': 1,
 })
 
-''' LIMPIEZA DE GIRO_COMERCIO '''
-
 df_t = codificar_columna(df_t, 'giro_comercio', 'HeyBancoDatathonDAGA/datos/giro_comercio_codificado.csv')
 
-
-''' LIMPIEZA DE COMERCIO '''
 df_t = codificar_columna(df_t, 'comercio', 'HeyBancoDatathonDAGA/datos/comercios_codificados.csv')
 
 print(df_t.describe())
