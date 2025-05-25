@@ -206,7 +206,7 @@ if __name__ == "__main__":
     clientes, transacciones = cargar_datos()
     
     # Configuración
-    cliente_id = "91477f382c3cf63ab5cd9263b502109243741158"
+    cliente_id = "c935634fbe417eb2a8444624b5e599475d06fb17"
     dias_prediccion = 60
     usar_ml = True
     
