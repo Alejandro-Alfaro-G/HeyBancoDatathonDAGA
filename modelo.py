@@ -67,13 +67,13 @@ print(f'MAE: {mae}')
 print(f'MSE: {mse}')
 
 # Gráfica de 30 muestras aleatorias
-indices = np.random.choice(len(y_test), size=30, replace=False)
+indices = np.random.choice(len(y_test), size=60, replace=False)
 y_test_sample = y_test.iloc[indices]
 y_pred_sample = y_pred[indices]
 
 plt.figure(figsize=(8, 6))
-plt.scatter(range(30), y_test_sample, color='blue', label='Valor Real', alpha=0.6)
-plt.scatter(range(30), y_pred_sample, color='orange', label='Predicción', alpha=0.6)
+plt.scatter(range(60), y_test_sample, color='blue', label='Valor Real', alpha=0.6)
+plt.scatter(range(60), y_pred_sample, color='orange', label='Predicción', alpha=0.6)
 plt.xlabel('Índice de muestra')
 plt.ylabel('Monto')
 plt.title('Valor Real vs Predicción (30 muestras aleatorias)')
