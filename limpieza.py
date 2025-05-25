@@ -120,7 +120,7 @@ df_t['fecha'] = pd.to_datetime(df_t['fecha'], format='%Y-%m-%d')
 # Crear nuevas columnas 'dia' y 'mes'
 df_t['dia'] = df_t['fecha'].dt.day
 df_t['mes'] = df_t['fecha'].dt.month
-df_t.drop(['fecha'], axis=1, inplace=True)
+
 # Convert 'tipo_venta' to categorical values 1: fisica, 0: digital
 df_t['tipo_venta'] = df_t['tipo_venta'].map({
     'digital': 1,
