@@ -232,7 +232,7 @@ if __name__ == "__main__":
         
         # Guardar resultados
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        nombre_archivo = f"predicciones_{cliente_id}_{datetime.now().date()}.csv"
+        nombre_archivo = f"predicciones_{cliente_id}.csv"
         resultados.to_csv(f"HeyBancoDatathonDAGA/resultados/{nombre_archivo}", index=False)
         print(f"\nResultados guardados en: HeyBancoDatathonDAGA/resultados/{nombre_archivo}")
         
