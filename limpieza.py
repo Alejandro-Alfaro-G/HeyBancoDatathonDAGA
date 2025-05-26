@@ -118,8 +118,10 @@ df_t = pd.read_csv('HeyBancoDatathonDAGA/datos/base_transacciones_final.csv')
 ##LIMPIEZA DE DATOS
 df_t['fecha'] = pd.to_datetime(df_t['fecha'], format='%Y-%m-%d')
 # Crear nuevas columnas 'dia' y 'mes'
-df_t['dia'] = df_t['fecha'].dt.day
+df_t['dia_mes'] = df_t['fecha'].dt.day
 df_t['mes'] = df_t['fecha'].dt.month
+df_t['dia_semana'] = df_t['fecha'].dt.dayofweek  # 0=Lunes, 6=Domingo
+
 
 # Convert 'tipo_venta' to categorical values 1: fisica, 0: digital
 df_t['tipo_venta'] = df_t['tipo_venta'].map({
